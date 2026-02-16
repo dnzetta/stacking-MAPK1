@@ -16,6 +16,7 @@ from torch_geometric.nn import (
     AttentiveFP
 )
 from rdkit.Chem import Draw
+from rdkit.Chem.Draw import rdMolDraw2D
 from torch_geometric.explain import Explainer, GNNExplainer
 from torch_geometric.explain.config import ExplanationType, MaskType
 
