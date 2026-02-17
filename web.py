@@ -127,14 +127,14 @@ st.title("🔬 MAPK1 Inhibitor Screening")
 
 # --- Introduction Section ---
 st.info("""
-This platform predicts mitogen-activated protein kinase 1 (MAPK1) inhibitors by using graph-based features through an stacking ensemble framework.
+This platform predicts mitogen-activated protein kinase 1 (MAPK1) inhibitors using graph-based molecular features within a stacking ensemble framework.
 """)
 
 # --- Model Architecture Section ---
 st.markdown("#### Model architectures and features")
 st.markdown("""
-* **Base Models:** Graph convolutional network (GCN), graph neural network (GNN), and AttentiveFP.
-* **Meta Model:** Logistic regression stacking model.
+* **Base models:** Attentive fingerprints (AttentiveFP), graph convolutional network (GCN), and graph neural network (GNN).
+* **Meta model:** Logistic regression (LR) model.
 * **Features:** Molecular graphs.
 """)
 
@@ -445,12 +445,12 @@ with tab2:
                 gnn_preds.append(None)
                 attfp_preds.append(None)
 
+        df["AttentiveFP_Prob"] = attfp_preds
         df["GCNN_Prob"] = gcnn_preds
         df["GNN_Prob"] = gnn_preds
-        df["AttentiveFP_Prob"] = attfp_preds
-        df["StackGNN_LR_Probability"] = final_preds
+        df["Stack_LR_Probability"] = final_preds
 
-        df["Inhibitor_Label"] = df["StackGNN_LR_Probability"].apply(
+        df["Inhibitor_Label"] = df["Stack_LR_Probability"].apply(
             lambda x: "Invalid" if x is None
             else ("Uncertain" if x == 0.5
             else ("Active" if x > 0.5
