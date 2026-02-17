@@ -421,7 +421,7 @@ with tab1:
                     label="Download structure (SVG)",
                     data=svg,
                     file_name="molecule_structure.svg",
-                    mime="image/svg+xml"
+                    mime="image/svg+xml", type="secondary"
                 )
 
 
@@ -461,13 +461,16 @@ with tab2:
             else "Inactive"))
         )
 
-        st.dataframe(df)
+        st.dataframe(df.style.set_properties(
+            background_color="white",
+            color="black"
+        ))
 
         st.download_button(
             "Download Results",
             df.to_csv(index=False),
             "predictions.csv",
-            "text/csv"
+            "text/csv", type="secondary"
         )
 
         st.markdown(
