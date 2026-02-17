@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 from rdkit import Chem
 from joblib import load
 import torch
@@ -15,7 +13,6 @@ from torch_geometric.nn import (
     global_mean_pool,
     AttentiveFP
 )
-from rdkit.Chem import Draw
 from rdkit.Chem.Draw import rdMolDraw2D
 from torch_geometric.explain import Explainer, GNNExplainer
 from torch_geometric.explain.config import ExplanationType, MaskType
@@ -133,8 +130,8 @@ This platform predicts mitogen-activated protein kinase 1 (MAPK1) inhibitors usi
 # --- Model Architecture Section ---
 st.markdown("#### Model architectures and features")
 st.markdown("""
-* **Base models:** Attentive fingerprints (AttentiveFP), graph convolutional network (GCN), and graph neural network (GNN).
-* **Meta model:** Logistic regression (LR) model.
+* **Base Models:** Graph convolutional network (GCN), graph neural network (GNN), and AttentiveFP.
+* **Meta Model:** Logistic regression stacking model.
 * **Features:** Molecular graphs.
 """)
 
@@ -340,14 +337,15 @@ def explain_graph(model, graph_data, device, threshold=0.7):
     return important_edges, edge_index
 
 
-def plot_molecule_with_highlights(smiles, important_edges, edge_index, pred_class, out_file="highlighted.png"):
+def plot_molecule_with_highlights(smiles, important_edges, edge_index, pred_class):
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
-        print("Could not parse SMILES for plotting.")
-        return
-    # Find important atoms and bonds
+        st.error("Could not parse SMILES for plotting.")
+        return None
+
     important_atoms = set()
     important_bonds = set()
+
     for idx in important_edges:
         a1, a2 = int(edge_index[0, idx]), int(edge_index[1, idx])
         important_atoms.add(a1)
@@ -355,17 +353,21 @@ def plot_molecule_with_highlights(smiles, important_edges, edge_index, pred_clas
         bond = mol.GetBondBetweenAtoms(a1, a2)
         if bond is not None:
             important_bonds.add(bond.GetIdx())
-    img = Draw.MolToImage(
-        mol, size=(500, 500),
+
+    drawer = rdMolDraw2D.MolDraw2DSVG(500, 500)
+    drawer.DrawMolecule(
+        mol,
         highlightAtoms=list(important_atoms),
         highlightBonds=list(important_bonds)
     )
-    img.save(out_file)
-    print(f"Highlighted molecule saved as {out_file} (Predicted class: {pred_class})")
-    plt.imshow(img)
-    plt.axis('off')
-    plt.title(f"Predicted class: {pred_class}")
-    plt.close()
+    drawer.FinishDrawing()
+    svg = drawer.GetDrawingText()
+
+    st.markdown(f"### Predicted class: {'Active' if pred_class else 'Inactive'}")
+    st.image(svg, use_container_width=True)
+
+    return svg
+
 
 # =========================
 # UI
@@ -400,7 +402,6 @@ with tab1:
         else:
             st.error("Active")
 
-        # NOW this works
         if st.button("Explain prediction"):
             important_edges, edge_index = explain_graph(
                 res["gnn"],
@@ -408,17 +409,20 @@ with tab1:
                 res["device"]
             )
 
-            out_file = "explain.png"
-            plot_molecule_with_highlights(
+            svg = plot_molecule_with_highlights(
                 st.session_state["last_smiles"],
                 important_edges,
                 edge_index,
-                pred_class=int(prob >= 0.5),
-                out_file=out_file
+                pred_class=int(prob >= 0.5)
             )
 
-            st.image(out_file, caption="Important substructures")
-
+            if svg:
+                st.download_button(
+                    label="Download structure (SVG)",
+                    data=svg,
+                    file_name="molecule_structure.svg",
+                    mime="image/svg+xml", type="secondary"
+                )
 
 
 with tab2:
@@ -448,22 +452,26 @@ with tab2:
         df["AttentiveFP_Prob"] = attfp_preds
         df["GCNN_Prob"] = gcnn_preds
         df["GNN_Prob"] = gnn_preds
-        df["Stack_LR_Probability"] = final_preds
+        df["AttentiveFP_Prob"] = attfp_preds
+        df["StackGNN_LR_Probability"] = final_preds
 
-        df["Inhibitor_Label"] = df["Stack_LR_Probability"].apply(
+        df["Inhibitor_Label"] = df["StackGNN_LR_Probability"].apply(
             lambda x: "Invalid" if x is None
             else ("Uncertain" if x == 0.5
             else ("Active" if x > 0.5
             else "Inactive"))
         )
 
-        st.dataframe(df)
+        st.dataframe(df.style.set_properties(
+            background_color="white",
+            color="black"
+        ))
 
         st.download_button(
             "Download Results",
             df.to_csv(index=False),
             "predictions.csv",
-            "text/csv"
+            "text/csv", type="secondary"
         )
 
         st.markdown(
