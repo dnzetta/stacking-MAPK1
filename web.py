@@ -124,14 +124,14 @@ st.title("🔬 MAPK1 Inhibitor Screening")
 
 # --- Introduction Section ---
 st.info("""
-This platform predicts mitogen-activated protein kinase 1 (MAPK1) inhibitors by using graph-based features through an stacking ensemble framework.
+This platform predicts mitogen-activated protein kinase 1 (MAPK1) inhibitors using graph-based molecular features within a stacking ensemble framework.
 """)
 
 # --- Model Architecture Section ---
 st.markdown("#### Model architectures and features")
 st.markdown("""
 * **Base Models:** Attentive fingerprints (AttentiveFP), graph convolutional network (GCN), and graph neural network (GNN).
-* **Meta Model:** Logistic regression stacking model.
+* **Stacking Model:** Logistic regression.
 * **Features:** Molecular graphs.
 """)
 
