@@ -130,8 +130,8 @@ This platform predicts **mitogen-activated protein kinase 1 (MAPK1)** inhibitors
 # --- Model Architecture Section ---
 st.markdown("#### Model architectures and features")
 st.markdown("""
-* **Base models:** Attentive fingerprints (AttentiveFP), graph convolutional neural network (GCNN), and graph neural network (GNN).
-* **Meta model:** Logistic regression (LR) model.
+* **Baseline models:** Attentive fingerprints (AttentiveFP), graph convolutional neural network (GCNN), and graph neural network (GNN).
+* **Stacked model:** Logistic regression (LR).
 * **Features:** Molecular graphs.
 """)
 
