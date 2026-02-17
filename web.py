@@ -452,9 +452,9 @@ with tab2:
         df["GCNN_Prob"] = gcnn_preds
         df["GNN_Prob"] = gnn_preds
         df["AttentiveFP_Prob"] = attfp_preds
-        df["StackGNN_LR_Probability"] = final_preds
+        df["Stack_Prob"] = final_preds
 
-        df["Inhibitor_Label"] = df["StackGNN_LR_Probability"].apply(
+        df["Inhibitor_Label"] = df["Stack_Prob"].apply(
             lambda x: "Invalid" if x is None
             else ("Uncertain" if x == 0.5
             else ("Active" if x > 0.5
