@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 from rdkit import Chem
 from joblib import load
 import torch
@@ -16,7 +14,6 @@ from torch_geometric.nn import (
     AttentiveFP
 )
 from rdkit.Chem.Draw import rdMolDraw2D
-from IPython.display import SVG
 from torch_geometric.explain import Explainer, GNNExplainer
 from torch_geometric.explain.config import ExplanationType, MaskType
 
