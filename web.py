@@ -6,6 +6,7 @@ from joblib import load
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import random
 from torch_geometric.data import Data
 from torch_geometric.nn import (
     GraphConv,
@@ -115,6 +116,15 @@ div.stButton > button:focus {
    
 </style>
 """, unsafe_allow_html=True)
+
+# =========================
+# Set random seeds for reproducibility
+# =========================
+np.random.seed(42)
+torch.manual_seed(42)
+random.seed(42)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed(42)
 
 # =========================
 # Page config
@@ -314,6 +324,13 @@ def predict_full_system(smiles):
     return final, stack, graph, consensus
 
 def explain_graph(model, graph_data, device, threshold=0.7):
+    # Set seeds for reproducible explanations
+    np.random.seed(42)
+    torch.manual_seed(42)
+    random.seed(42)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(42)
+    
     model.eval()
     wrapped = GNNWrapper(model).to(device)
 
