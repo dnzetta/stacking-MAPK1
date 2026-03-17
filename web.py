@@ -440,6 +440,13 @@ with tab1:
                 pred_class
             )
 
+            st.markdown(
+                "**Prediction Interpretation:**  \n"
+                "All models agree >0.5 → Active  \n"
+                "All models agree <0.5 → Inactive  \n"
+                "Any disagreement → Inconclusive"
+            )
+
             if svg:
                 st.download_button(
                     label="Download structure (SVG)",
