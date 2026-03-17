@@ -445,7 +445,7 @@ with tab2:
         for smiles in df["SMILES"]:
             result = predict_full_system(smiles)
             if result:
-                final, stack, _ = result
+                final, stack, _, consensus = result
                 final_preds.append(final)
                 gcnn_preds.append(stack[0][0])
                 gnn_preds.append(stack[0][1])
