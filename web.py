@@ -424,7 +424,13 @@ with tab1:
         st.write(f"GNN: {stack[0][1]:.4f}")
         st.write(f"AttentiveFP: {stack[0][2]:.4f}")
         st.write(f"Stack Model: {prob:.4f}")
-
+        st.markdown(
+            "**Prediction Interpretation:**  \n"
+            "All models agree >0.5 → Active  \n"
+            "All models agree <0.5 → Inactive  \n"
+            "Any disagreement → Inconclusive"
+        )
+        
         if st.button("Explain prediction"):
             important_edges, edge_index = explain_graph(
                 res["gnn"],
@@ -438,13 +444,6 @@ with tab1:
                 important_edges,
                 edge_index,
                 pred_class
-            )
-
-            st.markdown(
-                "**Prediction Interpretation:**  \n"
-                "All models agree >0.5 → Active  \n"
-                "All models agree <0.5 → Inactive  \n"
-                "Any disagreement → Inconclusive"
             )
 
             if svg:
