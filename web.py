@@ -417,7 +417,7 @@ with tab1:
     if "last_result" in st.session_state:
         prob, stack, graph, consensus = st.session_state["last_result"]
 
-        st.metric("Consensus Prediction", consensus)
+        st.metric("Agreement Prediction", consensus)
 
         st.write("Base model outputs:")
         st.write(f"GCNN: {stack[0][0]:.4f}")
@@ -493,7 +493,7 @@ with tab2:
                 else:
                     consensuses.append("Inconclusive")
         
-        df["Consensus_Label"] = consensuses
+        df["Agreement_Label"] = consensuses
 
         st.dataframe(df.style.set_properties(
             background_color="white",
@@ -509,7 +509,6 @@ with tab2:
 
         st.markdown(
             "**Prediction Interpretation:**  \n"
-            "Consensus based on agreement:  \n"
             "All models agree >0.5 → Active  \n"
             "All models agree <0.5 → Inactive  \n"
             "Any disagreement → Inconclusive"
