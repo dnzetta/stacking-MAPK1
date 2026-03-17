@@ -300,7 +300,18 @@ def predict_full_system(smiles):
     stack = np.array([[p1, p2, p3]])
     final = res["meta"].predict_proba(stack)[0, 1]
 
-    return final, stack, graph
+    # Determine consensus
+    baseline_probs = [p1, p2, p3]
+    all_probs = baseline_probs + [final]
+    
+    if all(p > 0.5 for p in all_probs):
+        consensus = "Active"
+    elif all(p < 0.5 for p in all_probs):
+        consensus = "Inactive"
+    else:
+        consensus = "Inconclusive"
+
+    return final, stack, graph, consensus
 
 def explain_graph(model, graph_data, device, threshold=0.7):
     model.eval()
@@ -387,20 +398,15 @@ with tab1:
             st.session_state["last_smiles"] = smiles_input
 
     if "last_result" in st.session_state:
-        prob, stack, graph = st.session_state["last_result"]
+        prob, stack, graph, consensus = st.session_state["last_result"]
 
-        st.metric("Final Probability", f"{prob:.4f}")
+        st.metric("Consensus Prediction", consensus)
 
         st.write("Base model outputs:")
         st.write(f"GCNN: {stack[0][0]:.4f}")
         st.write(f"GNN: {stack[0][1]:.4f}")
         st.write(f"AttentiveFP: {stack[0][2]:.4f}")
-
-        st.markdown("**Interpretation:**")
-        if prob < 0.5:
-            st.success("Inactive")
-        else:
-            st.error("Active")
+        st.write(f"Stack Model: {prob:.4f}")
 
         if st.button("Explain prediction"):
             important_edges, edge_index = explain_graph(
@@ -409,11 +415,12 @@ with tab1:
                 res["device"]
             )
 
+            pred_class = consensus == "Active"
             svg = plot_molecule_with_highlights(
                 st.session_state["last_smiles"],
                 important_edges,
                 edge_index,
-                pred_class=int(prob >= 0.5)
+                pred_class
             )
 
             if svg:
@@ -454,12 +461,22 @@ with tab2:
         df["GNN_Prob"] = gnn_preds
         df["Stack_Model_Probability"] = final_preds
 
-        df["Inhibitor_Label"] = df["Stack_Model_Probability"].apply(
-            lambda x: "Invalid" if x is None
-            else ("Uncertain" if x == 0.5
-            else ("Active" if x > 0.5
-            else "Inactive"))
-        )
+        # Compute consensus
+        consensuses = []
+        for i in range(len(final_preds)):
+            if final_preds[i] is None:
+                consensuses.append("Invalid")
+            else:
+                baseline = [gcnn_preds[i], gnn_preds[i], attfp_preds[i]]
+                all_p = baseline + [final_preds[i]]
+                if all(p > 0.5 for p in all_p):
+                    consensuses.append("Active")
+                elif all(p < 0.5 for p in all_p):
+                    consensuses.append("Inactive")
+                else:
+                    consensuses.append("Inconclusive")
+        
+        df["Consensus_Label"] = consensuses
 
         st.dataframe(df.style.set_properties(
             background_color="white",
@@ -475,9 +492,10 @@ with tab2:
 
         st.markdown(
             "**Prediction Interpretation:**  \n"
-            "\\< 0.5 → Inactive  \n"
-            "= 0.5 → Uncertain  \n"
-            "\\> 0.5 → Active"
+            "Consensus based on agreement:  \n"
+            "All models agree >0.5 → Active  \n"
+            "All models agree <0.5 → Inactive  \n"
+            "Any disagreement → Inconclusive"
         )
 
 
