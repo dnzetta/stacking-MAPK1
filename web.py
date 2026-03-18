@@ -417,10 +417,7 @@ with tab1:
     if "last_result" in st.session_state:
         prob, stack, graph, consensus = st.session_state["last_result"]
 
-        st.markdown(
-            "<h2 style='margin-bottom:0;'>Agreement Prediction</h2>",
-            unsafe_allow_html=True
-        )
+        st.markdown("#### Agreement Prediction")
         st.markdown(
             f"<h1 style='margin-top:0; pointer-events:none;'>{consensus}</h1>",
             unsafe_allow_html=True
