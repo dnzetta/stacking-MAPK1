@@ -420,6 +420,7 @@ with tab1:
         st.markdown("##### Agreement Prediction")
         st.markdown(f"### {consensus}")
 
+        
         st.write("**Base Model Outputs**")
         st.write(f"GCNN: {stack[0][0]:.4f}")
         st.write(f"GNN: {stack[0][1]:.4f}")
