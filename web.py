@@ -417,8 +417,7 @@ with tab1:
     if "last_result" in st.session_state:
         prob, stack, graph, consensus = st.session_state["last_result"]
 
-        st.write("### Agreement Prediction")
-        st.write(f"# {consensus}")
+        st.metric(label="Agreement Prediction", value=consensus)
 
         st.write("**Base Model Outputs**")
         st.write(f"GCNN: {stack[0][0]:.4f}")
