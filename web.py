@@ -417,7 +417,7 @@ with tab1:
     if "last_result" in st.session_state:
         prob, stack, graph, consensus = st.session_state["last_result"]
 
-        st.markdown("#### Agreement Prediction")
+        st.markdown("##### Agreement Prediction")
         st.markdown(f"### {consensus}")
 
         st.write("**Base Model Outputs**")
