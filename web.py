@@ -426,7 +426,7 @@ with tab1:
         st.write(f"GNN: {stack[0][1]:.4f}")
         st.write(f"AttentiveFP: {stack[0][2]:.4f}")
 
-        st.write("**Stacked Model Prediction**")
+        st.write("**Stacked Model Output**")
         st.write(f"{prob:.4f}")
 
         st.markdown(
