@@ -418,7 +418,7 @@ with tab1:
         prob, stack, graph, consensus = st.session_state["last_result"]
 
         st.write("**Agreement Prediction**")
-        st.metric(consensus)
+        st.write(consensus)
 
         st.write("**Base Model Outputs**")
         st.write(f"GCNN: {stack[0][0]:.4f}")
