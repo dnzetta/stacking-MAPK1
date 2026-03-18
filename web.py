@@ -419,12 +419,12 @@ with tab1:
 
         st.metric("Agreement Prediction", consensus)
 
-        st.write("Base Model Outputs")
+        st.write("**Base Model Outputs**")
         st.write(f"GCNN: {stack[0][0]:.4f}")
         st.write(f"GNN: {stack[0][1]:.4f}")
         st.write(f"AttentiveFP: {stack[0][2]:.4f}")
 
-        st.write("Stacked Model Prediction")
+        st.write("**Stacked Model Prediction**")
         st.write(f"{prob:.4f}")
 
         st.markdown(
