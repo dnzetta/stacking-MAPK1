@@ -419,11 +419,14 @@ with tab1:
 
         st.metric("Agreement Prediction", consensus)
 
-        st.write("Base model outputs:")
+        st.subheader("Base Model Outputs")
         st.write(f"GCNN: {stack[0][0]:.4f}")
         st.write(f"GNN: {stack[0][1]:.4f}")
         st.write(f"AttentiveFP: {stack[0][2]:.4f}")
-        st.write(f"Stack Model: {prob:.4f}")
+
+        st.subheader("Stacked Model Prediction")
+        st.write(f"{prob:.4f}")
+        
         st.markdown(
             "**Prediction Interpretation:**  \n"
             "All models agree >0.5 → Active  \n"
@@ -431,7 +434,7 @@ with tab1:
             "Any disagreement → Inconclusive"
         )
         
-        if st.button("Explain prediction"):
+        if st.button("Explain Prediction"):
             important_edges, edge_index = explain_graph(
                 res["gnn"],
                 graph.cpu(),
