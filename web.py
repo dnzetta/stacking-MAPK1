@@ -418,7 +418,30 @@ with tab1:
         prob, stack, graph, consensus = st.session_state["last_result"]
 
         st.markdown("##### Agreement Prediction")
-        st.markdown(f"### {consensus}")
+        #st.markdown(f"### {consensus}")
+        if consensus.lower() == "active":
+            bg = "#f8d7da"   # light red
+        elif consensus.lower() == "inactive":
+            bg = "#d1e7dd"   # light green
+        else:
+            bg = "#e2e3e5"   # grey
+        
+        st.markdown(
+            f"""
+            <div style="
+                background-color: {bg};
+                color: black;
+                padding: 20px;
+                border-radius: 15px;
+                font-size: 26px;
+                font-weight: 600;
+                text-align: center;
+            ">
+                {consensus}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
         
         st.write("**Base Model Outputs**")
