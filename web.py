@@ -140,8 +140,9 @@ This platform predicts **mitogen-activated protein kinase 1 (MAPK1)** inhibitors
 # --- Model Architecture Section ---
 st.markdown("#### Model architectures and features")
 st.markdown("""
-* **Baseline models:** Attentive fingerprints (AttentiveFP), graph convolutional neural network (GCNN), and graph neural network (GNN).
+* **GNN baseline models:** Attentive fingerprints (AttentiveFP), graph convolutional neural network (GCNN), and graph message-passing neural network (GMNN).
 * **Stacked model:** Logistic regression (LR).
+* **Consensus model:** ConsensusGNN (average based on GNN baseline outputs).
 * **Features:** Molecular graphs.
 """)
 
@@ -312,16 +313,19 @@ def predict_full_system(smiles):
 
     # Determine consensus
     baseline_probs = [p1, p2, p3]
-    all_probs = baseline_probs + [final]
-    
+    consensus_prob = float(np.mean(baseline_probs))
+
+    # Include ALL models: 3 GNN + meta + consensus
+    all_probs = baseline_probs + [final, consensus_prob]
+
     if all(p > 0.5 for p in all_probs):
         consensus = "Active"
     elif all(p < 0.5 for p in all_probs):
         consensus = "Inactive"
     else:
-        consensus = "Inconclusive"
+        consensus = "Inconclusive (low confidence)"
 
-    return final, stack, graph, consensus
+    return final, stack, graph, consensus, consensus_prob
 
 def explain_graph(model, graph_data, device, threshold=0.7):
     # Set seeds for reproducible explanations
@@ -415,7 +419,7 @@ with tab1:
             st.session_state["last_smiles"] = smiles_input
 
     if "last_result" in st.session_state:
-        prob, stack, graph, consensus = st.session_state["last_result"]
+        prob, stack, graph, consensus, consensus_prob = st.session_state["last_result"]
 
         st.markdown("##### Agreement Prediction")
         #st.markdown(f"### {consensus}")
@@ -449,14 +453,17 @@ with tab1:
         st.write(f"GNN: {stack[0][1]:.4f}")
         st.write(f"AttentiveFP: {stack[0][2]:.4f}")
 
-        st.write("**Stacked Model Output**")
+        st.write("**StackGNN_LR Output**")
         st.write(f"{prob:.4f}")
+
+        st.write("**ConsensusGNN Output**")
+        st.write(f"{consensus_prob:.4f}")
 
         st.markdown(
             "**Prediction Interpretation:**  \n"
-            "All models agree >0.5 → Active  \n"
-            "All models agree <0.5 → Inactive  \n"
-            "Any disagreement → Inconclusive"
+            "All models agree > 0.5 → Active  \n"
+            "All models agree < 0.5 → Inactive  \n"
+            "Any disagreement → Inconclusive (low confidence)"
         )
         
         if st.button("Explain Prediction"):
@@ -492,25 +499,29 @@ with tab2:
         gcnn_preds = []
         gnn_preds = []
         attfp_preds = []
+        consensus_probs = []
 
         for smiles in df["SMILES"]:
             result = predict_full_system(smiles)
             if result:
-                final, stack, _, consensus = result
+                final, stack, _, consensus, cprob = result
                 final_preds.append(final)
                 gcnn_preds.append(stack[0][0])
                 gnn_preds.append(stack[0][1])
                 attfp_preds.append(stack[0][2])
+                consensus_probs.append(cprob)
             else:
                 final_preds.append(None)
                 gcnn_preds.append(None)
                 gnn_preds.append(None)
                 attfp_preds.append(None)
+                consensus_probs.append(None)
 
         df["AttentiveFP_Prob"] = attfp_preds
         df["GCNN_Prob"] = gcnn_preds
-        df["GNN_Prob"] = gnn_preds
-        df["Stack_Model_Probability"] = final_preds
+        df["GMNN_Prob"] = gnn_preds
+        df["StackGNN_LR_Prob"] = final_preds
+        df["ConsensusGNN_Prob"] = consensus_probs
 
         # Compute consensus
         consensuses = []
@@ -519,13 +530,13 @@ with tab2:
                 consensuses.append("Invalid")
             else:
                 baseline = [gcnn_preds[i], gnn_preds[i], attfp_preds[i]]
-                all_p = baseline + [final_preds[i]]
+                all_p = baseline + [final_preds[i], consensus_probs[i]]
                 if all(p > 0.5 for p in all_p):
                     consensuses.append("Active")
                 elif all(p < 0.5 for p in all_p):
                     consensuses.append("Inactive")
                 else:
-                    consensuses.append("Inconclusive")
+                    consensuses.append("Inconclusive (low confidence)")
         
         df["Agreement_Label"] = consensuses
 
@@ -543,9 +554,9 @@ with tab2:
 
         st.markdown(
             "**Prediction Interpretation:**  \n"
-            "All models agree >0.5 → Active  \n"
-            "All models agree <0.5 → Inactive  \n"
-            "Any disagreement → Inconclusive"
+            "All models agree > 0.5 → Active  \n"
+            "All models agree < 0.5 → Inactive  \n"
+            "Any disagreement → Inconclusive (low confidence)"
         )
 
 
